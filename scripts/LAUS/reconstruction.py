@@ -1,5 +1,6 @@
 import os
 import  torch
+from cgan_model import Wang2020UnetGenerator
 
 def load_gen_model(model_dir=None, epoch=None, num_downs=8, norm_layer=nn.BatchNorm2d, device=None):
     # Instantiate the model architecture
@@ -9,11 +10,6 @@ def load_gen_model(model_dir=None, epoch=None, num_downs=8, norm_layer=nn.BatchN
                                       ngf=64,
                                       norm_layer=norm_layer,
                                       use_dropout=False).to(device)
-
-    discriminator = Wang2020UnetDiscriminator(input_nc=3, # channel data(2) + real or fake bmode (1)
-                                              ndf=64,
-                                              n_layers=3,
-                                              norm_layer=norm_layer).to(device)
 
     if isinstance(epoch, int) and epoch == -1:
         gen_history = {"train_loss": [], "val_loss": []}
@@ -67,18 +63,26 @@ def load_gen_model(model_dir=None, epoch=None, num_downs=8, norm_layer=nn.BatchN
 
 
 
+if __name__ == '__main__':
 
-model_gen, _, _, _, _ = load_gen_model(model_dir=os.path.join(this_dir, "models", 'wang'),
-                                         epoch=epoch,
-                                         num_downs=5,
-                                         device=device)
+    model_gen, _, _, _, _ = load_gen_model(model_dir=os.path.join(this_dir, "models", 'wang'),
+                                             epoch=99,
+                                             num_downs=5,
+                                             device=device)
 
-model_gen.eval()
+    model_gen.eval()
 
-## Code to read channel data (2, 800, 128)
-##
+    ## Code to read channel data (2, 800, 128)
 
-channel_data = channel_data / channel_data.abs().max()
-N, C, H, W = channel_data.size()
-z = torch.randn(N, 1, H, W).to(device)
-wang_phantom = model_gen(torch.cat((channel_data, z), dim=1))
+    ##
+
+    channel_data = channel_data / channel_data.abs().max()
+
+
+    N, C, H, W = channel_data.size()
+    z = torch.randn(N, 1, H, W).to(device)
+    wang_phantom = model_gen(torch.cat((channel_data, z), dim=1))
+
+    output_in_bmode_format = lambda x: (x * 60 - 60).detach().cpu().numpy().squeeze()
+
+    wang_phantom = output_in_bmode_format(wang_phantom)

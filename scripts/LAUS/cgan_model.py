@@ -1,6 +1,6 @@
 import functools
-from .unet_parts import *
-
+import torch.nn as nn
+import torch
 
 
 class Wang2020UnetGenerator(nn.Module):
