@@ -32,7 +32,25 @@ def tmab_shapley(model: nn.Module,
                  checkpoint_interval: int = 100,
                  resume_from_checkpoint: bool = False,
                  resume_sample: int = None) -> Dict[Tuple[str, int], float]:
-
+    """
+    Implementación del algoritmo TMAB-Shapley usando la métrica MS-SSIM
+    
+    Args:
+        model: Modelo a evaluar
+        num_filters: Número de filtros importantes a identificar
+        num_samples: Número máximo de iteraciones
+        truncation: Umbral de truncamiento para performance
+        delta: Parámetro delta para límites de confianza
+        epsilon: Tolerancia para convergencia
+        img_dir: Directorio con imágenes de entrada/target
+        base_dir: Directorio para guardar resultados
+        checkpoint_interval: Cada cuántas iteraciones guardar checkpoint
+        resume_from_checkpoint: Si continuar desde último checkpoint
+    
+    Returns:
+        Dict con valores Shapley para cada filtro
+    """
+                   
     if resume_from_checkpoint:
         state = load_checkpoint(resume_sample)
         filters = state['filters']
@@ -136,7 +154,7 @@ def main():
 
     # Configure parameters  
     num_filters = 20 # Numero de filtros mas importantes a seleccionar
-    num_samples = 50000 # Numero de iteraciones
+    num_samples = 50000 # Numero de iteraciones maximas
     truncation = 0.25 # Indice de truncamiento temprano
     delta = 0.1 # Valor por defecto para calculo de confidence bounds
     epsilon = 0.0001 # Valor de tolerancia para seleccion de filtros importantes
